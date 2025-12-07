@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "types": ["node"],
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    // Strict mode settings (fully enabled)
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    // Additional strict checks (fully enabled)
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    // Additional compiler options
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    // Modern TypeScript options
+    "verbatimModuleSyntax": true,
+    "allowArbitraryExtensions": true,
+    "noErrorTruncation": true
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
+}
