@@ -680,3 +680,356 @@ main::-webkit-scrollbar-thumb:hover {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+
+/* ========== Responsive Breakpoints ========== */
+/* Ultra Narrow Width (< 300px) */
+@media (max-width: 300px) {
+  header {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  header > span {
+    font-size: var(--text-base);
+  }
+
+  .platform-indicator {
+    padding: 2px var(--space-sm);
+    font-size: 0.7rem;
+  }
+
+  .platform-name {
+    display: none; /* Hide platform name on very narrow screens */
+  }
+
+  main {
+    padding: var(--space-md);
+  }
+
+  /* Mode buttons - 2x2 grid instead of 4 in a row */
+  .mode-selector {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xs);
+  }
+
+  .mode-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-xs);
+  }
+
+  /* Compact button text */
+  #optimizeBtn,
+  #cancelBtn {
+    font-size: var(--text-sm);
+    padding: var(--space-sm);
+  }
+
+  #optimizeBtn i,
+  #cancelBtn i {
+    margin-right: 0;
+  }
+
+  /* Hide button text, keep icons only */
+  #optimizeBtn::after,
+  #cancelBtn::after {
+    content: attr(data-label);
+    margin-left: var(--space-xs);
+  }
+
+  /* Progress steps - more compact */
+  .progress-steps {
+    gap: 0;
+  }
+
+  .step-label {
+    display: none; /* Hide labels on narrow screens */
+  }
+
+  .step-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 0.65rem;
+  }
+
+  /* History - more compact */
+  .history-section {
+    max-height: 120px;
+  }
+
+  .history-item {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .history-mode {
+    padding: 1px var(--space-xs);
+    font-size: 0.7rem;
+  }
+}
+
+/* Medium Width (300px - 350px) - Default optimization target */
+@media (min-width: 300px) and (max-width: 350px) {
+  /* Mode buttons - slightly more compact */
+  .mode-btn {
+    padding: var(--space-sm);
+    font-size: var(--text-sm);
+  }
+
+  /* Optimize button spacing */
+  .button-row {
+    gap: var(--space-xs);
+  }
+}
+
+/* ========== Enhanced Micro-interactions ========== */
+/* Button Hover - Ripple Effect */
+#optimizeBtn::before,
+#cancelBtn::before,
+.history-reuse::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+  pointer-events: none;
+}
+
+#optimizeBtn:active::before,
+#cancelBtn:active::before,
+.history-reuse:active::before {
+  width: 200px;
+  height: 200px;
+}
+
+/* Enhanced button hover with scale */
+#optimizeBtn:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.02);
+}
+
+#cancelBtn:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.mode-btn {
+  overflow: hidden;
+}
+
+.mode-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.mode-btn:active::after {
+  width: 100px;
+  height: 100px;
+}
+
+/* Loading Skeleton Screen */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-variant) 0%,
+    var(--outline-variant) 20%,
+    var(--surface-variant) 40%,
+    var(--surface-variant) 100%
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-text {
+  height: 1em;
+  margin: 0.5em 0;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-title {
+  height: 1.5em;
+  width: 60%;
+  margin-bottom: 1em;
+}
+
+.skeleton-button {
+  height: 40px;
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+
+/* Progress indicator with skeleton */
+#progressContainer.loading .progress-step .step-icon {
+  background: linear-gradient(
+    90deg,
+    var(--surface-variant) 0%,
+    var(--outline-variant) 50%,
+    var(--surface-variant) 100%
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-color: transparent;
+}
+
+/* Hint text - fade in animation */
+.hint {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 0.7;
+    transform: translateY(0);
+  }
+}
+
+/* ========== Performance Optimizations ========== */
+/* Use GPU acceleration for transforms */
+#optimizeBtn,
+#cancelBtn,
+.mode-btn,
+.history-reuse,
+.platform-indicator,
+#settingsBtn {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Optimize transitions - only animate necessary properties */
+.mode-btn {
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              color var(--duration-fast) var(--easing-standard),
+              box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+#promptInput {
+  /* Only animate border and shadow, not padding */
+  transition: border-color var(--duration-normal) var(--easing-standard),
+              box-shadow var(--duration-normal) var(--easing-standard);
+}
+
+#promptInput:focus {
+  /* Remove padding transition to prevent layout shift */
+  padding: var(--space-md);
+  border-width: 2px;
+}
+
+/* Optimize scrollbar rendering */
+main::-webkit-scrollbar {
+  width: 4px;
+  /* Force GPU acceleration */
+  transform: translateZ(0);
+}
+
+/* Reduce paint operations during animations */
+.progress-step.active .step-icon {
+  will-change: transform, box-shadow;
+}
+
+/* Optimize hover states with contain property */
+.mode-btn:hover,
+.history-item:hover,
+.clear-btn:hover {
+  contain: layout style paint;
+}
+
+/* Use content-visibility for off-screen content */
+.history-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 150px;
+}
+
+/* ========== Additional Polish ========== */
+/* Smooth focus ring transitions */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  transition: outline-offset 0.2s ease;
+}
+
+/* Better disabled state */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  filter: grayscale(0.3);
+  pointer-events: none;
+}
+
+/* Platform indicator - pulse animation when detected */
+.platform-indicator.detected {
+  animation: platform-detected 0.5s ease-out;
+}
+
+@keyframes platform-detected {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* History item - slide in animation */
+.history-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Error toast - bounce in */
+#errorToast {
+  animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px) scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
