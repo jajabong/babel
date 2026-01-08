@@ -345,4 +345,101 @@ document.addEventListener('DOMContentLoaded', () => {
     div.textContent = text
     return div.innerHTML
   }
+
+  // ========== Platform Detection (v4.1) ==========
+
+  /**
+   * Detect LLM platform from URL
+   * @param {string} url - Tab URL
+   * @returns {object|null} Platform object with id and name, or null
+   */
+  function detectPlatform(url) {
+    if (!url) return null
+
+    const hostname = new URL(url).hostname.toLowerCase()
+
+    // Platform detection patterns
+    if (hostname.includes('gemini.google.com')) {
+      return { id: 'gemini', name: 'Gemini', icon: '💎' }
+    }
+    if (hostname.includes('chatgpt.com') || hostname.includes('chat.openai.com')) {
+      return { id: 'chatgpt', name: 'ChatGPT', icon: '🤖' }
+    }
+    if (hostname.includes('claude.ai')) {
+      return { id: 'claude', name: 'Claude', icon: '🧠' }
+    }
+
+    return null
+  }
+
+  /**
+   * Detect current active tab's platform
+   */
+  async function detectCurrentPlatform() {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+
+      if (!tab || !tab.url) {
+        updatePlatformIndicator(null)
+        return
+      }
+
+      const platform = detectPlatform(tab.url)
+      updatePlatformIndicator(platform)
+    } catch (error) {
+      console.error('[BabelPrompt] Platform detection error:', error)
+      updatePlatformIndicator(null)
+    }
+  }
+
+  /**
+   * Update platform indicator UI
+   * @param {object|null} platform - Platform object or null
+   */
+  function updatePlatformIndicator(platform) {
+    const indicator = document.getElementById('platformIndicator')
+    const icon = indicator.querySelector('.platform-icon')
+    const name = indicator.querySelector('.platform-name')
+
+    if (!platform) {
+      icon.textContent = '⚠️'
+      name.textContent = '不支持'
+      indicator.style.opacity = '0.6'
+      updateOptimizeButton(null)
+      return
+    }
+
+    icon.textContent = platform.icon
+    name.textContent = platform.name
+    indicator.style.opacity = '1'
+    updateOptimizeButton(platform)
+  }
+
+  /**
+   * Update optimize button text based on platform
+   * @param {object|null} platform - Platform object or null
+   */
+  function updateOptimizeButton(platform) {
+    const btn = document.getElementById('optimizeBtn')
+    if (platform) {
+      btn.innerHTML = `<i class="fas fa-magic"></i> 优化并注入到 ${platform.name}`
+    } else {
+      btn.innerHTML = `<i class="fas fa-magic"></i> 优化并注入`
+    }
+  }
+
+  // Listen for tab activation
+  chrome.tabs.onActivated.addListener(() => {
+    detectCurrentPlatform()
+  })
+
+  // Listen for tab updates
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.active) {
+      detectCurrentPlatform()
+    }
+  })
+
+  // Initialize platform detection
+  detectCurrentPlatform()
 })

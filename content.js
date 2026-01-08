@@ -394,27 +394,152 @@
   // ====== NEW v4.0 FUNCTIONS: Two-Pass Optimization ======
 
   /**
+   * Detect conversation mode: NEW vs INCREMENTAL optimization
+   * @returns {string} 'NEW' | 'INCREMENTAL'
+   */
+  function detectConversationMode() {
+    const messages = getExistingMessages()
+
+    if (messages.length === 0) {
+      return 'NEW'
+    }
+
+    // Analyze the latest user input for incremental keywords
+    const lastUserInput = getLastUserMessage()
+    if (!lastUserInput) {
+      return 'NEW'
+    }
+
+    // Incremental optimization keywords (Chinese + English)
+    const incrementalKeywords = [
+      '优化', '改进', '更好', '漂亮', '美观',
+      '添加', '增加', '加上', '还有', '以及', '修改',
+      '调整', '完善', '增强', '提高', '提升', '扩展',
+      'refine', 'improve', 'better', 'add', 'enhance', 'optimize', 'make it'
+    ]
+
+    const lowerInput = lastUserInput.toLowerCase()
+    const hasIncrementalKeyword = incrementalKeywords.some(kw =>
+      lowerInput.includes(kw)
+    )
+
+    // Decision logic
+    if (messages.length >= 2 && hasIncrementalKeyword) {
+      console.log('[BabelPrompt] Detected INCREMENTAL mode:', { messageCount: messages.length, hasKeyword: true })
+      return 'INCREMENTAL'
+    }
+
+    // Long conversations also tend toward incremental optimization
+    if (messages.length >= 4) {
+      console.log('[BabelPrompt] Detected INCREMENTAL mode (long conversation):', { messageCount: messages.length })
+      return 'INCREMENTAL'
+    }
+
+    console.log('[BabelPrompt] Detected NEW mode:', { messageCount: messages.length, hasKeyword: hasIncrementalKeyword })
+    return 'NEW'
+  }
+
+  /**
+   * Get existing message count from current conversation
+   * @returns {Array} Array of message elements
+   */
+  function getExistingMessages() {
+    const llm = detectLLMPlatform()
+    if (!llm) return []
+
+    // Platform-specific message selectors
+    const selectors = {
+      gemini: '.model-response, .user-input',
+      chatgpt: '[data-testid^="conversation-turn-"]',
+      claude: '[data-message-author-role="assistant"], [data-message-author-role="user"]'
+    }
+
+    const selector = selectors[llm.name]
+    if (!selector) return []
+
+    try {
+      const messages = document.querySelectorAll(selector)
+      return Array.from(messages)
+    } catch (e) {
+      console.warn('[BabelPrompt] Error querying messages:', e)
+      return []
+    }
+  }
+
+  /**
+   * Get the last user message from the conversation
+   * @returns {string|null} Last user message text or null
+   */
+  function getLastUserMessage() {
+    const llm = detectLLMPlatform()
+    if (!llm) return null
+
+    // Platform-specific user message selectors
+    const selectors = {
+      gemini: '.user-input:last-of-type',
+      chatgpt: '[data-message-author-role="user"]:last',
+      claude: '[data-message-author-role="user"]:last'
+    }
+
+    const selector = selectors[llm.name]
+    if (!selector) return null
+
+    try {
+      const element = document.querySelector(selector)
+      return element ? element.textContent.trim() : null
+    } catch (e) {
+      console.warn('[BabelPrompt] Error getting last user message:', e)
+      return null
+    }
+  }
+
+  /**
    * Generate Meta-Prompt for first pass optimization
    * @param {string} userPrompt - User's original input
-   * @param {string} mode - Optimization mode (general/code/creative)
+   * @param {string} mode - Optimization mode (general/code/creative/business)
+   * @param {string} conversationMode - Conversation mode (NEW/INCREMENTAL)
    * @returns {string} Generated meta-prompt
    */
-  function generateMetaPrompt(userPrompt, mode) {
+  function generateMetaPrompt(userPrompt, mode, conversationMode = 'NEW') {
     const modeInstructions = {
-      general: 'You are a prompt engineering expert. Optimize the following user prompt to be more clear, structured, and effective.',
-      code: 'You are a technical prompt expert. Optimize the following coding-related prompt to include proper context, requirements, and output specifications.',
-      creative: 'You are a creative writing prompt expert. Enhance the following creative prompt with vivid details, clear constraints, and inspiring direction.',
-      business: 'You are a business strategy expert. Optimize the following business-related prompt to include clear objectives, context, and actionable insights.'
+      general: 'You are a prompt engineering expert.',
+      code: 'You are a technical prompt expert.',
+      creative: 'You are a creative writing prompt expert.',
+      business: 'You are a business strategy expert.'
     }
 
     const instruction = modeInstructions[mode] || modeInstructions.general
 
-    return `${instruction}
+    // Generate different Meta-Prompts based on conversation mode
+    if (conversationMode === 'INCREMENTAL') {
+      // INCREMENTAL mode: User is refining/existing work
+      return `${instruction}
 
-Original user prompt:
-"""
-${userPrompt}
-"""
+**IMPORTANT**: This is an INCREMENTAL OPTIMIZATION task. The user is asking you to refine, improve, or enhance an existing conversation.
+
+**Context Analysis**:
+- This conversation already has ${getExistingMessages().length} messages
+- The user's latest request is asking for improvement/refinement
+- You should build upon the existing context, not start from scratch
+
+**Your Task**:
+Output ONLY the optimized prompt that:
+1. Acknowledges the existing conversation context
+2. Focuses on the specific improvement requested
+3. Maintains continuity with previous discussion
+4. Requests targeted enhancements based on the user's refinement request
+
+**User's Raw Request:**
+"${userPrompt}"
+
+Do not include any introductory or concluding remarks.`
+    } else {
+      // NEW mode: Fresh start optimization
+      return `${instruction}
+Optimize the following user prompt to be more clear, structured, and effective.
+
+**User's Raw Request:**
+"${userPrompt}"
 
 Please provide an optimized version of this prompt that:
 1. Has clear context and background
@@ -423,6 +548,7 @@ Please provide an optimized version of this prompt that:
 4. Uses precise and unambiguous language
 
 Return ONLY the optimized prompt, without any explanations or meta-commentary.`
+    }
   }
 
   /**
@@ -484,16 +610,20 @@ Return ONLY the optimized prompt, without any explanations or meta-commentary.`
     console.log('BabelPrompt: Starting two-pass optimization', { userPrompt, mode, platform: llm.name })
 
     try {
-      // Step 1: Generate Meta-Prompt
-      const metaPrompt = generateMetaPrompt(userPrompt, mode)
+      // Step 1: Detect conversation mode (NEW vs INCREMENTAL)
+      const conversationMode = detectConversationMode()
+      console.log('BabelPrompt: Conversation mode detected:', conversationMode)
+
+      // Step 2: Generate Meta-Prompt with context awareness
+      const metaPrompt = generateMetaPrompt(userPrompt, mode, conversationMode)
       console.log('BabelPrompt: Meta-Prompt generated', metaPrompt.substring(0, 100) + '...')
 
-      // Step 2: First injection - Meta-Prompt
+      // Step 3: First injection - Meta-Prompt
       console.log('BabelPrompt: Pass 1 - Injecting Meta-Prompt')
       notifyProgress(2, `等待 ${llm.name} 响应...`)
       await injectWithStreaming(metaPrompt)
 
-      // Step 3: Stream extract LLM response
+      // Step 4: Stream extract LLM response
       console.log('BabelPrompt: Pass 1 - Waiting for LLM response')
       const optimizedPrompt = await streamExtractResponse()
 
@@ -503,7 +633,7 @@ Return ONLY the optimized prompt, without any explanations or meta-commentary.`
 
       console.log('BabelPrompt: Pass 1 complete - Optimized prompt received')
 
-      // Step 4: Second injection - Optimized Prompt
+      // Step 5: Second injection - Optimized Prompt
       console.log('BabelPrompt: Pass 2 - Injecting optimized prompt')
       notifyProgress(3, '正在注入优化结果...')
       await injectWithStreaming(optimizedPrompt)

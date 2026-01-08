@@ -481,3 +481,24 @@ main::-webkit-scrollbar-thumb:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
 }
+
+/* Platform Indicator (v4.1) */
+.platform-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.platform-icon {
+  font-size: 14px;
+}
+
+.platform-name {
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
