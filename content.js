@@ -403,7 +403,8 @@
     const modeInstructions = {
       general: 'You are a prompt engineering expert. Optimize the following user prompt to be more clear, structured, and effective.',
       code: 'You are a technical prompt expert. Optimize the following coding-related prompt to include proper context, requirements, and output specifications.',
-      creative: 'You are a creative writing prompt expert. Enhance the following creative prompt with vivid details, clear constraints, and inspiring direction.'
+      creative: 'You are a creative writing prompt expert. Enhance the following creative prompt with vivid details, clear constraints, and inspiring direction.',
+      business: 'You are a business strategy expert. Optimize the following business-related prompt to include clear objectives, context, and actionable insights.'
     }
 
     const instruction = modeInstructions[mode] || modeInstructions.general
@@ -489,7 +490,7 @@ Return ONLY the optimized prompt, without any explanations or meta-commentary.`
 
       // Step 2: First injection - Meta-Prompt
       console.log('BabelPrompt: Pass 1 - Injecting Meta-Prompt')
-      notifyProgress(2, '等待 Claude 响应...')
+      notifyProgress(2, `等待 ${llm.name} 响应...`)
       await injectWithStreaming(metaPrompt)
 
       // Step 3: Stream extract LLM response

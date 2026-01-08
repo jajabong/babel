@@ -150,7 +150,7 @@ const STREAM_CONFIG = {
 
 ## Session Log
 
-### [2026-01-08] - Architecture Cleanup & Restructure
+### [2026-01-08] - v4.0.0 Release & Documentation Update
 **Status**: ✅ COMPLETED
 
 **Changes**:
@@ -159,6 +159,8 @@ const STREAM_CONFIG = {
 - ✅ Updated README.md to reflect Side Panel architecture
 - ✅ Reduced code by 30% (content.js: 957 → 667 lines)
 - ✅ Cleaned up 80+ obsolete files
+- ✅ Created MIGRATION_GUIDE.md for v1.x → v4.0 upgrades
+- ✅ Updated CLAUDE.md with latest architecture details
 
 **Project Structure**:
 ```
@@ -169,8 +171,21 @@ const STREAM_CONFIG = {
 ├── sidepanel.*            # Side Panel UI
 ├── lib/                   # Libraries
 ├── .ado/                  # ADO documentation
+├── MIGRATION_GUIDE.md     # v1.x → v4.0 migration guide
 └── README.md              # Updated documentation
 ```
+
+**Deleted Files** (10 total):
+- `popup.html/js/css` - Replaced by Side Panel
+- `index.tsx` - Removed React/TypeScript
+- `src/` - Removed React source directory
+- `test-page.html`, `debug-test.js` - Consolidated into test-llm-page.html
+- `.ado/delivery/`, `.ado/evidence/` - Empty directories removed
+
+**Content.js Optimization**:
+- Removed 6 obsolete message handlers (INJECT_PROMPT, EXECUTE_GHOST_PROMPT, etc.)
+- Removed 9 unused functions (handleAutoInjectAndResponse, extractLLMResponse, etc.)
+- Kept core functionality: TWO_PASS_OPTIMIZE, streamExtractResponse, injectWithStreaming
 
 ### [2025-01-08] - Initial Assessment by ADO v3.0
 **Status**: 🟢 READY FOR DEVELOPMENT

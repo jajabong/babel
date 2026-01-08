@@ -318,7 +318,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const labels = {
       general: '通用',
       code: '代码',
-      creative: '创意'
+      creative: '创意',
+      business: '商务'
     }
     return labels[mode] || mode
   }
