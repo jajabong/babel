@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BabelPrompt v4.0</title>
+    <link rel="stylesheet" href="sidepanel.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <i class="fas fa-brain"></i>
+        <span>BabelPrompt</span>
+        <button id="settingsBtn"><i class="fas fa-cog"></i></button>
+    </header>
+
+    <main>
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="general">General</button>
+            <button class="mode-btn" data-mode="code">Code</button>
+            <button class="mode-btn" data-mode="creative">Creative</button>
+        </div>
+
+        <textarea id="promptInput" placeholder="你的需求..."></textarea>
+
+        <div class="button-row">
+            <button id="optimizeBtn">
+                <i class="fas fa-magic"></i>
+                优化并注入
+            </button>
+            <button id="cancelBtn" class="hidden">
+                <i class="fas fa-times"></i>
+                取消
+            </button>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div id="progressContainer" class="hidden">
+            <div class="progress-header">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span id="progressText">处理中...</span>
+            </div>
+            <div class="progress-steps">
+                <div class="progress-step" data-step="1">
+                    <div class="step-icon">1</div>
+                    <div class="step-label">注入 Meta-Prompt</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-icon">2</div>
+                    <div class="step-label">等待响应</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-icon">3</div>
+                    <div class="step-label">注入优化结果</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-icon">4</div>
+                    <div class="step-label">完成</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hint">⚡ 自动完成两次提问</div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <div class="history-header">
+                <i class="fas fa-history"></i>
+                <span>历史记录</span>
+                <button id="clearHistoryBtn" class="clear-btn">
+                    <i class="fas fa-trash"></i>
+                    清空
+                </button>
+            </div>
+            <div id="historyList" class="history-list">
+                <div class="history-empty">暂无历史记录</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="errorToast" class="hidden"></div>
+
+    <script src="lib/prompt_engine.js"></script>
+    <script src="lib/fallback_manager.js"></script>
+    <script src="sidepanel.js"></script>
+</body>
+</html>

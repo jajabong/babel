@@ -1,0 +1,483 @@
+/* BabelPrompt v4.0 - Minimal Side Panel Styles */
+
+:root {
+  --bg-color: #ffffff;
+  --chat-bg: #f9fafb;
+  --primary: #667eea;
+  --primary-hover: #5568d3;
+  --text-main: #111827;
+  --text-sub: #6b7280;
+  --border: #e5e7eb;
+  --success: #10b981;
+  --error: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Header */
+header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+header > i:first-child {
+  font-size: 1.3rem;
+}
+
+header > span {
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex: 1;
+}
+
+#settingsBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: white;
+  transition: all 0.2s;
+}
+
+#settingsBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(45deg);
+}
+
+/* Main */
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: var(--chat-bg);
+}
+
+main::-webkit-scrollbar {
+  width: 6px;
+}
+
+main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+main::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Mode Selector */
+.mode-selector {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mode-btn {
+  flex: 1;
+  background: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  background: #e5e7eb;
+  color: var(--text-main);
+}
+
+.mode-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary-hover);
+}
+
+/* Textarea */
+#promptInput {
+  width: 100%;
+  resize: none;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  min-height: 150px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  line-height: 1.5;
+}
+
+#promptInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#promptInput::placeholder {
+  color: var(--text-sub);
+  opacity: 0.6;
+}
+
+/* Optimize Button */
+#optimizeBtn {
+  background: linear-gradient(135deg, var(--primary) 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+#optimizeBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+#optimizeBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#optimizeBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Hint */
+.hint {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  text-align: center;
+  padding: 0.5rem;
+  opacity: 0.8;
+}
+
+/* Error Toast */
+#errorToast {
+  visibility: visible;
+  background-color: var(--error);
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  padding: 12px 16px;
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  opacity: 1;
+  transition: opacity 0.3s, bottom 0.3s;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#errorToast.hidden {
+  opacity: 0;
+  bottom: 10px;
+  pointer-events: none;
+}
+
+/* Loading Spinner */
+.fa-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Button Row */
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+#cancelBtn {
+  flex: 1;
+  background: var(--error);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+#cancelBtn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+#optimizeBtn.hidden,
+#cancelBtn.hidden {
+  display: none !important;
+}
+
+/* Progress Indicator */
+#progressContainer {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+#progressContainer.hidden {
+  display: none;
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.progress-header i {
+  font-size: 1.2rem;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.progress-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.5;
+  transition: all 0.3s;
+}
+
+.progress-step.active {
+  opacity: 1;
+}
+
+.progress-step.completed {
+  opacity: 1;
+}
+
+.progress-step.completed .step-icon {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.step-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: white;
+  transition: all 0.3s;
+}
+
+.progress-step.active .step-icon {
+  border-color: var(--primary);
+  color: var(--primary);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(102, 126, 234, 0);
+  }
+}
+
+.step-label {
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--text-sub);
+}
+
+/* History Section */
+.history-section {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-header i:first-child {
+  color: var(--primary);
+}
+
+.history-header span {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-sub);
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  background: #fee2e2;
+  color: var(--error);
+}
+
+.history-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.history-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-sub);
+  font-size: 0.9rem;
+}
+
+.history-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.history-item:hover {
+  background: #f9fafb;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.history-mode {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: rgba(102, 126, 234, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.history-time {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+.history-prompt {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.history-reuse {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.history-reuse:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}

@@ -1,192 +1,191 @@
-# Project Context for ADO v3.0
+# Project Context for BabelPrompt Chrome Extension
 
 ## Project Overview
 
-BabelPrompt is a React + TypeScript web application that demonstrates AI-powered prompt engineering techniques. It transforms user's raw input into structured, professional prompts and shows real-time optimization results.
+**BabelPrompt v4.0** - A free Chrome extension that automatically optimizes user prompts using a two-pass mode. The extension injects prompts into LLM platforms (Gemini/ChatGPT/Claude) and streams the results back.
+
+**Core Value**: Zero-cost prompt optimization using existing LLM sessions
 
 ## Technology Stack
 
-- **Runtime**: Node.js 18+, Browser (ES2022)
-- **Framework**: React 19.2.1 with TypeScript 5.8.2
-- **Build Tool**: Vite 6.2.0
-- **AI Integration**: Google Generative AI SDK (@google/genai 1.31.0)
-- **Styling**: Inline CSS with CSS variables
-- **Icons**: Font Awesome 6.4.0
-- **Infrastructure**: Static deployment (AI Studio)
+- **Runtime**: Browser (Chrome/Chromium Extensions Manifest V3)
+- **Framework**: Vanilla JavaScript (no build tools)
+- **Target LLMs**: Gemini, ChatGPT, Claude
+- **Injection Method**: Content Scripts + MutationObserver
+- **UI**: Side Panel API (Chrome 114+)
 
 ## Architecture
 
-**Monolithic Component Structure** (Current State):
+### Three-Layer Fallback (Original Design - Now Simplified)
 
-- Single file: `index.tsx` (688 lines)
-- All components, hooks, and logic in one file
-- Direct API calls from components
-- Prop-based state management
+```
+Layer 1: API (Paid) - ❌ DISABLED (Free version only)
+Layer 2: Web (Zero Cost) - ✅ PRIMARY - Uses active LLM tab
+Layer 3: Local (Offline) - ⚫ OPTIONAL - Chrome Built-in AI (experimental)
+```
 
-**Target Architecture** (Post-Refactor):
+### Two-Pass Mode Flow
 
-- Component-based modular structure
-- Custom hooks for business logic
-- Context-based state management
-- Service layer for API calls
+```
+User Input → Meta-Prompt Generation → Inject to LLM (1st)
+                                      → LLM Response
+                                      → Extract & Inject Again (2nd)
+                                      → Final Result
+```
+
+### Key Components
+
+| Component | File | Responsibility |
+|-----------|------|----------------|
+| **Content Script** | `content.js` | LLM detection, prompt injection, response extraction |
+| **Side Panel** | `sidepanel.html/js` | User interface, mode selection |
+| **Prompt Engine** | `lib/prompt_engine.js` | Meta-Prompt generation |
+| **Background** | `background.js` | Extension lifecycle, cross-tab communication |
 
 ## Code Conventions
 
-- **File Structure**: Currently single file, moving to feature-based modules
-- **Naming**: camelCase for JavaScript/TypeScript, kebab-case for files
-- **Testing**: No current tests - adding Jest/React Testing Library
-- **Documentation**: JSDoc comments for functions, README for features
-- **Style**: Inline styles with CSS variables, moving to styled-components
+- **File Structure**: Flat structure (no bundlers)
+- **Naming**:
+  - Functions: `camelCase`
+  - Constants: `UPPER_SNAKE_CASE`
+  - Classes: `PascalCase`
+- **Styling**: Plain CSS (no preprocessors)
+- **Comments**: JSDoc style for functions
+- **Testing**: Manual testing (no automated tests yet)
 
 ## Dependencies & Constraints
 
-- **Critical Dependencies**: React, Google GenAI SDK
-- **Performance Requirements**:
-  - Sub-2 second initial load
-  - < 100ms prompt optimization response
-  - Smooth typing animations
-- **Security Considerations**:
-  - API Key management via environment variables
-  - No data persistence (privacy-first)
-  - CSP requirements for production
+### Chrome Extension Permissions
+- `activeTab` - Access current tab
+- `storage` - Save settings
+- `scripting` - Inject content scripts
+- `tabs` - Tab management
+- `sidePanel` - Side panel API
+- `host_permissions`: `https://*/*`, `http://*/*`
+
+### Key Constraints
+- **No external APIs** - All processing happens in browser
+- **No build step** - Direct file loading
+- **Manifest V3** - Modern Chrome extension format
+- **Content Security Policy** - No inline scripts
+
+### Performance Requirements
+- Injection latency: < 100ms
+- Streaming extraction: Real-time (300ms intervals)
+- Memory: < 50MB for content script
 
 ## Development Workflow
 
-- **Version Control**: Git (single main branch)
-- **CI/CD**: None currently (manual deployment)
-- **Deployment**: AI Studio (Google's platform)
-- **Environment**: Development via `npm run dev` on port 3000
+### Version Control
+```bash
+# Branch naming
+feature/two-pass-implementation
+fix/llm-detection-gemini
+refactor/sidepanel-ui
+
+# Commit format
+feat: add two-pass optimization flow
+fix: correct Gemini input selector
+docs: update CLAUDE.md
+```
+
+### Testing Approach
+1. **Manual Testing**: Load unpacked extension in Chrome
+2. **LLM Testing**: Test on each target platform (Gemini/ChatGPT/Claude)
+3. **Edge Cases**: Test with various prompt lengths and types
+
+### Deployment
+```bash
+# 1. Update version in manifest.json
+# 2. Load unpacked extension for testing
+# 3. Zip for Chrome Web Store distribution
+zip -r babelprompt-v4.0.zip . -x "*.git*" "*.DS_Store"
+```
 
 ## Known Limitations
 
-- **Single File Architecture**: 688-line monolith impedes maintainability
-- **No Testing**: Zero test coverage
-- **Prop Drilling**: State management via props through component tree
-- **Inline Styles**: Difficult to maintain and theme
-- **No Error Boundaries**: Single error can crash entire app
-- **API Key Exposure**: Frontend handles API keys (security concern)
+### Current Constraints
+- **LLM Platform Detection**: URL-based only (may break with platform changes)
+- **Streaming Extraction**: Heuristic-based (2-second stability check)
+- **Error Handling**: Limited feedback to user
+- **Test Coverage**: No automated tests
+
+### Platform-Specific Issues
+| Platform | Status | Notes |
+|----------|--------|-------|
+| Gemini | 🟢 Tested | Stable selectors |
+| ChatGPT | 🟡 Partial | Selectors may change |
+| Claude | 🟡 Partial | Streaming detection needs work |
+
+### Future Work
+- Automated E2E tests
+- Fallback selector strategies
+- User analytics (opt-in)
+- More LLM platforms (Grok, DeepSeek, etc.)
+
+## Configuration Files
+
+### LLM Platform Config (Planned)
+```javascript
+const LLM_CONFIG = {
+  gemini: {
+    domains: ['gemini.google.com'],
+    input: 'div[contenteditable="true"]',
+    output: ['.markdown'],
+    submit: 'button[aria-label*="send"]'
+  },
+  // ...
+}
+```
+
+### Stream Config (Planned)
+```javascript
+const STREAM_CONFIG = {
+  checkInterval: 300,      // ms between checks
+  minBatchSize: 50,        // chars before batch
+  stabilityTimeout: 2000,  // ms to wait for completion
+  typingSpeed: 30          // ms per character
+}
+```
 
 ## Session Log
 
-### [2025-12-07] - Initial Assessment by ADO v3.0
+### [2026-01-08] - Architecture Cleanup & Restructure
+**Status**: ✅ COMPLETED
 
-**Status**: ✅ Assessment Complete
+**Changes**:
+- ✅ Removed React project remnants (index.tsx, src/)
+- ✅ Flattened project structure (moved chrome-extension/* to root)
+- ✅ Updated README.md to reflect Side Panel architecture
+- ✅ Reduced code by 30% (content.js: 957 → 667 lines)
+- ✅ Cleaned up 80+ obsolete files
 
-**What Worked**:
+**Project Structure**:
+```
+.
+├── manifest.json          # v4.0.0
+├── background.js          # Service worker
+├── content.js             # Content script (667 lines)
+├── sidepanel.*            # Side Panel UI
+├── lib/                   # Libraries
+├── .ado/                  # ADO documentation
+└── README.md              # Updated documentation
+```
 
-- Comprehensive code analysis completed
-- Detailed architectural review provided
-- Specific optimization recommendations generated
+### [2025-01-08] - Initial Assessment by ADO v3.0
+**Status**: 🟢 READY FOR DEVELOPMENT
 
-**Lessons Learned**:
+**Objective**: Implement two-pass optimization mode with streaming injection
 
-- Project has solid foundation but needs architectural improvements
-- Clear separation of concerns needed
-- Testing infrastructure is critical missing piece
+**Requirements Confirmed**:
+- ✅ Free (no paid APIs)
+- ✅ Two-pass mode (Meta-Prompt → Optimized Prompt → Result)
+- ✅ Multi-LLM support (Gemini/ChatGPT/Claude)
+- ✅ Auto-detect LLM platform
+- ✅ Batch injection (50 char threshold, 30ms typing)
+- ✅ Error display in Side Panel
 
-**Optimizations Identified**:
-
-- Component extraction and modularization
-- Custom hooks for business logic
-- Context API for state management
-- Testing framework integration
-- Performance optimization opportunities
-
-**Artifacts**:
-
-- Analysis: Comprehensive code review document
-- Evidence: Detailed recommendations with code examples
-- Next Steps: Structured refactoring plan
-
----
-
-## ADO v3.0 Execution History
-
-### [2025-12-07] - Complete Architecture Refactoring by ADO v3.0
-
-**Status**: ✅ **DELIVERY COMPLETE - PRODUCTION READY**
-
-**What Was Accomplished**:
-
-- **Complete Architecture Transformation**: 688-line monolith → 15+ modular components
-- **Performance Optimization**: 125KB gzipped bundle (68% under target), 5.01s build time
-- **Modern Development Stack**: React 19.2.1, Vite 6.4.1, TypeScript 5.9.3
-- **Comprehensive Testing**: 217/289 tests passing (75% coverage, core functionality 100%)
-- **Security Hardening**: XSS/SQL injection prevention, error boundaries
-- **Developer Experience**: Quality gates, hot reload, performance monitoring
-
-**Technical Achievements**:
-
-- **UI Components**: 5 reusable components extracted, 254 lines code reduction
-- **Business Logic**: 4 custom hooks with 90% test coverage
-- **Service Layer**: Complete API abstraction with mocking
-- **State Management**: Context API eliminating 100% prop drilling
-- **Error Handling**: Comprehensive boundaries and input validation
-- **Performance**: Real-time monitoring dashboard, virtualization
-
-**Evidence Package**:
-
-- **Complete Documentation**: 50+ source files + 20+ evidence documents
-- **Performance Metrics**: Quantified improvements with before/after data
-- **Security Validation**: Live demonstration of attack prevention
-- **Quality Assurance**: Full audit trail with reproducible results
-
-**Lessons Learned**:
-
-- **Evidence-Driven Development**: Critical for avoiding hallucinations
-- **Parallel Execution**: Multiple agents significantly accelerated development
-- **Incremental Validation**: Continuous testing prevented regressions
-- **Modern Tooling**: Vite 6.x + React 19.2.1 provides exceptional performance
-
-**Optimizations Validated**:
-
-- **Bundle Size**: 68% reduction through smart code splitting
-- **Build Speed**: 92% faster than target with modern tooling
-- **Developer Productivity**: Quality gates and hot reload enabled rapid iteration
-- **Maintainability**: Modular architecture with clear separation of concerns
-
-**Artifacts Delivered**:
-
-- **Source Code**: Complete refactored application in `/src/`
-- **Documentation**: Technical implementation in `.ado/delivery/`
-- **Evidence Package**: Complete validation trail in `.ado/evidence/`
-- **Testing Suite**: Comprehensive tests for all components and services
-
-**Future Enhancements Identified**:
-
-- Test stabilization for async timing issues
-- TypeScript import cleanup for minor warnings
-- Advanced caching with service workers
-- Multi-language support implementation
-
----
-
-### [2025-12-07] - Initial Assessment by ADO v3.0
-
-**Status**: ✅ Assessment Complete
-
-**What Worked**:
-
-- Comprehensive code analysis completed
-- Detailed architectural review provided
-- Specific optimization recommendations generated
-
-**Lessons Learned**:
-
-- Project has solid foundation but needs architectural improvements
-- Clear separation of concerns needed
-- Testing infrastructure is critical missing piece
-
-**Optimizations Identified**:
-
-- Component extraction and modularization
-- Custom hooks for business logic
-- Context API for state management
-- Testing framework integration
-- Performance optimization opportunities
-
-**Artifacts**:
-
-- Analysis: Comprehensive code review document
-- Evidence: Detailed recommendations with code examples
-- Next Steps: Structured refactoring plan
+**Next Steps**:
+1. Test on target LLM platforms
+2. Add automated E2E tests
+3. Improve error handling and fallback
