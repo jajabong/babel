@@ -5,7 +5,6 @@
   // Configuration
   const CONFIG = {
     highlightedInputClass: 'babelprompt-highlighted',
-    floatingButtonClass: 'babelprompt-floating-btn',
   }
 
   // LLM Platform Configuration (v4.0)
@@ -52,7 +51,6 @@
   function init() {
     console.log('BabelPrompt content script initialized')
     setupInputDetection()
-    setupFloatingButton()
     setupMessageListener()
     detectInputFields()
   }
@@ -178,25 +176,6 @@
     input.classList.remove(CONFIG.highlightedInputClass)
     input.style.boxShadow = ''
     input.style.outline = ''
-  }
-
-  // Create floating action button
-  function setupFloatingButton() {
-    const button = document.createElement('div')
-    button.className = CONFIG.floatingButtonClass
-    button.innerHTML = `
-      <div class="babelprompt-btn-content">
-        <i class="fas fa-magic"></i>
-        <span>BabelPrompt</span>
-      </div>
-    `
-
-    document.body.appendChild(button)
-
-    // Button click handler
-    button.addEventListener('click', () => {
-      chrome.runtime.sendMessage({ type: 'OPEN_POPUP' })
-    })
   }
 
   // Set up message listener from background script
